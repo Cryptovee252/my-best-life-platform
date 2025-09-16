@@ -1,14 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
-const config = require('../dev-config.json');
 const cuid = require('cuid');
 
 const router = express.Router();
 
 // Create a direct PostgreSQL connection
 const pool = new Pool({
-  connectionString: config.database.url,
+  connectionString: process.env.DATABASE_URL,
 });
 
 // Middleware to verify JWT token
