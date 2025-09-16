@@ -1,0 +1,46 @@
+name: Simple Hostinger Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Run deployment script
+      run: |
+        cd HelpMyBestLife
+        chmod +x deploy-to-hostinger.sh
+        ./deploy-to-hostinger.sh
+        
+    - name: Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.HOSTINGER_FTP_HOST }}
+        username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+        password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        local-dir: ./HelpMyBestLife/deployment-package/
+        server-dir: ./public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env
+          **/.env.*
+          
+    - name: Deployment Status
+      run: |
+        echo "🚀 Deployment completed!"
+        echo "🌐 Your app should be live at: https://mybestlifeapp.com"
+        echo "📋 Check deployment-package/ for uploaded files"
