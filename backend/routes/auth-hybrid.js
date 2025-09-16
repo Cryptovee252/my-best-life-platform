@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { Pool } = require('pg');
-const config = require('../dev-config.json');
 
 const router = express.Router();
 
@@ -29,7 +28,7 @@ let usePrisma = false;
 let pool = null;
 if (!usePrisma) {
   pool = new Pool({
-    connectionString: config.database.url,
+    connectionString: process.env.DATABASE_URL,
   });
   
   // Test direct connection

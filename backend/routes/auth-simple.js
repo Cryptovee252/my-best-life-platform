@@ -2,13 +2,12 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
-const config = require('../dev-config.json');
 
 const router = express.Router();
 
 // Create a direct PostgreSQL connection
 const pool = new Pool({
-  connectionString: config.database.url,
+  connectionString: process.env.DATABASE_URL,
 });
 
 // Test database connection
