@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - My Best Life</title>
+    <meta name="description" content="Verify your email address to complete your My Best Life account setup.">
+    <link rel="icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --glow-color: rgba(102, 126, 234, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Verification Container */
+        .verification-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 50px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .verification-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-gradient);
+        }
+
+        .verification-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 40px;
+            color: white;
+            animation: bounceIn 0.8s ease-out 0.3s both;
+        }
+
+        .verification-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .verification-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .verification-status {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #43e97b;
+            font-weight: 500;
+        }
+
+        .verification-error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .verification-loading {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 25px var(--glow-color);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px var(--glow-color);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #667eea;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .verification-container {
+                padding: 40px 20px;
+            }
+
+            .verification-title {
+                font-size: 1.5rem;
+            }
+
+            .verification-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+
+    <!-- Verification Container -->
+    <div class="verification-container">
+        <div class="verification-icon" id="verificationIcon">
+            <i class="fas fa-envelope"></i>
+        </div>
+
+        <h1 class="verification-title" id="verificationTitle">Verifying Your Email</h1>
+        
+        <div class="verification-message" id="verificationMessage">
+            Please wait while we verify your email address...
+        </div>
+
+        <div class="verification-status verification-loading" id="verificationStatus">
+            <div class="spinner"></div>
+            Verifying your email address...
+        </div>
+
+        <div id="verificationActions" style="display: none;">
+            <a href="/login.html" class="btn btn-primary">Sign In Now</a>
+            <a href="/" class="btn btn-secondary">Go to Homepage</a>
+        </div>
+
+        <div id="errorActions" style="display: none;">
+            <a href="/register.html" class="btn btn-primary">Try Again</a>
+            <a href="/" class="btn btn-secondary">Go to Homepage</a>
+        </div>
+    </div>
+
+    <script>
+        // Get verification token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        // Verification states
+        const states = {
+            LOADING: 'loading',
+            SUCCESS: 'success',
+            ERROR: 'error',
+            EXPIRED: 'expired'
+        };
+
+        let currentState = states.LOADING;
+
+        // Update UI based on state
+        function updateUI(state, message = '') {
+            const icon = document.getElementById('verificationIcon');
+            const title = document.getElementById('verificationTitle');
+            const status = document.getElementById('verificationStatus');
+            const actions = document.getElementById('verificationActions');
+            const errorActions = document.getElementById('errorActions');
+
+            // Remove all status classes
+            status.className = 'verification-status';
+
+            switch (state) {
+                case states.LOADING:
+                    icon.innerHTML = '<i class="fas fa-envelope"></i>';
+                    title.textContent = 'Verifying Your Email';
+                    status.innerHTML = '<div class="spinner"></div> Verifying your email address...';
+                    status.classList.add('verification-loading');
+                    actions.style.display = 'none';
+                    errorActions.style.display = 'none';
+                    break;
+
+                case states.SUCCESS:
+                    icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    title.textContent = 'Email Verified!';
+                    status.textContent = message || 'Your email has been successfully verified!';
+                    status.classList.add('verification-success');
+                    actions.style.display = 'block';
+                    errorActions.style.display = 'none';
+                    break;
+
+                case states.ERROR:
+                    icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    title.textContent = 'Verification Failed';
+                    status.textContent = message || 'There was an error verifying your email.';
+                    status.classList.add('verification-error');
+                    actions.style.display = 'none';
+                    errorActions.style.display = 'block';
+                    break;
+
+                case states.EXPIRED:
+                    icon.innerHTML = '<i class="fas fa-clock"></i>';
+                    title.textContent = 'Link Expired';
+                    status.textContent = 'This verification link has expired. Please request a new one.';
+                    status.classList.add('verification-error');
+                    actions.style.display = 'none';
+                    errorActions.style.display = 'block';
+                    break;
+            }
+        }
+
+        // Verify email with backend
+        async function verifyEmail() {
+            if (!token) {
+                updateUI(states.ERROR, 'No verification token provided.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/verify-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    updateUI(states.SUCCESS, result.message || 'Your email has been successfully verified!');
+                } else {
+                    if (result.error && result.error.includes('expired')) {
+                        updateUI(states.EXPIRED);
+                    } else {
+                        updateUI(states.ERROR, result.error || 'Verification failed. Please try again.');
+                    }
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                updateUI(states.ERROR, 'Network error. Please check your connection and try again.');
+            }
+        }
+
+        // Auto-verify on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simulate a small delay for better UX
+            setTimeout(() => {
+                verifyEmail();
+            }, 1000);
+        });
+
+        // Handle resend verification
+        function resendVerification() {
+            // This would typically open a modal or redirect to a resend page
+            alert('Please go to the login page and use the "Resend Verification" option.');
+        }
+    </script>
+</body>
+</html>

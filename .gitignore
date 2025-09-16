@@ -153,7 +153,6 @@ dev-report-*.txt
 
 # Deployment packages
 deployment-package/
-hostinger-deploy/
 shared-hosting-package/
 
 # Untitled folders
