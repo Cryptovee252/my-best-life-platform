@@ -1,9 +1,16 @@
-name: Simple Hostinger Deploy
+name: DISABLED - DISABLED - Simple Hostinger Deploy (Manual Only) (Manual Only)
+
+# DISABLED FOR PRODUCTION SAFETY
+# This workflow is disabled to prevent accidental production deployments
+# All production deployments must be manual with explicit permission
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: # Allow manual deployment
+  workflow_dispatch: # Manual trigger only - NO AUTO-DEPLOYMENT
+    inputs:
+      confirm_manual_deploy:
+        description: 'Type "CONFIRM" to deploy (MANUAL ONLY)'
+        required: true
+        default: 'DISABLED'
 
 jobs:
   deploy:

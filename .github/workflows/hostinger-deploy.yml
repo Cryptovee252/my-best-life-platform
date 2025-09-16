@@ -1,4 +1,4 @@
-name: Deploy to Hostinger
+name: DISABLED - Deploy to Hostinger (Manual Only)
 
 on:
   push:

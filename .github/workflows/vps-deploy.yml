@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: DISABLED - Deploy to VPS (Manual Only)
 
 on:
   push:

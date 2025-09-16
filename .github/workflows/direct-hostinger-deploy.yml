@@ -1,4 +1,4 @@
-name: Direct Hostinger Deployment
+name: DISABLED - Direct Hostinger Deployment (Manual Only)
 
 on:
   push:
