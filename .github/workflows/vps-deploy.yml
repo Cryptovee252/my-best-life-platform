@@ -1,0 +1,244 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual deployment
+
+jobs:
+  deploy-to-vps:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Prepare deployment files
+      run: |
+        # Create deployment directory
+        mkdir -p vps-deployment
+        
+        # Copy frontend files
+        cp HelpMyBestLife/hostinger-deploy/index-modern.html vps-deployment/index.html
+        cp HelpMyBestLife/hostinger-deploy/register-modern.html vps-deployment/register.html
+        cp HelpMyBestLife/hostinger-deploy/login-modern.html vps-deployment/login.html
+        cp HelpMyBestLife/hostinger-deploy/verify-email.html vps-deployment/verify-email.html
+        cp HelpMyBestLife/hostinger-deploy/reset-password.html vps-deployment/reset-password.html
+        cp HelpMyBestLife/hostinger-deploy/MBL_Logo.webp vps-deployment/MBL_Logo.webp
+        cp HelpMyBestLife/hostinger-deploy/favicon.ico vps-deployment/favicon.ico
+        
+        # Copy backend files
+        cp -r backend vps-deployment/
+        
+        # Copy production files
+        cp backend/app-production.js vps-deployment/backend/
+        cp backend/routes/auth-production.js vps-deployment/backend/routes/
+        
+        # Create production package.json
+        cat > vps-deployment/backend/package.json << 'EOF'
+        {
+          "name": "mybestlife-backend",
+          "version": "1.0.0",
+          "description": "Backend for My Best Life app",
+          "main": "app-production.js",
+          "scripts": {
+            "start": "node app-production.js",
+            "dev": "nodemon app-production.js",
+            "db:generate": "prisma generate",
+            "db:push": "prisma db push",
+            "deploy": "npm install --production && pm2 start app-production.js --name mybestlife"
+          },
+          "dependencies": {
+            "@prisma/client": "^5.7.1",
+            "bcryptjs": "^3.0.2",
+            "body-parser": "^2.2.0",
+            "cors": "^2.8.5",
+            "dotenv": "^16.5.0",
+            "express": "^4.18.2",
+            "jsonwebtoken": "^9.0.2",
+            "nodemailer": "^6.9.0",
+            "pg": "^8.16.3"
+          },
+          "devDependencies": {
+            "prisma": "^5.7.1"
+          },
+          "engines": {
+            "node": ">=18.0.0"
+          }
+        }
+        EOF
+        
+        # Create environment template
+        cat > vps-deployment/backend/.env.template << 'EOF'
+        # My Best Life - VPS Environment Configuration
+        
+        # Node Environment
+        NODE_ENV=production
+        PORT=3000
+        
+        # Database Configuration
+        DATABASE_URL=postgresql://mybestlife:password@localhost:5432/mybestlife
+        
+        # JWT Configuration
+        JWT_SECRET=your-super-secret-jwt-key-here
+        
+        # Email Configuration
+        SMTP_HOST=smtp.gmail.com
+        SMTP_PORT=587
+        SMTP_USER=your-email@gmail.com
+        SMTP_PASS=your-app-password
+        
+        # Frontend URL
+        FRONTEND_URL=https://mybestlifeapp.com
+        EOF
+        
+        # Create VPS deployment script
+        cat > vps-deployment/deploy-to-vps.sh << 'EOF'
+        #!/bin/bash
+        
+        echo "🚀 Deploying My Best Life to VPS..."
+        
+        # Navigate to application directory
+        cd /var/www/mybestlife
+        
+        # Pull latest code from GitHub
+        git pull origin main
+        
+        # Install/update dependencies
+        cd backend
+        npm install --production
+        
+        # Restart application with PM2
+        pm2 restart mybestlife || pm2 start app-production.js --name mybestlife
+        
+        echo "✅ Deployment complete!"
+        echo "📊 Check status with: pm2 status"
+        echo "📝 View logs with: pm2 logs mybestlife"
+        EOF
+        
+        chmod +x vps-deployment/deploy-to-vps.sh
+        
+        # Create VPS setup instructions
+        cat > vps-deployment/VPS-SETUP-INSTRUCTIONS.md << 'EOF'
+        # My Best Life - VPS Setup Instructions
+        
+        ## Quick Setup
+        
+        ### 1. Run VPS Setup Script
+        ```bash
+        # Download and run the setup script
+        wget https://raw.githubusercontent.com/Cryptovee252/my-best-life-platform/main/vps-setup.sh
+        chmod +x vps-setup.sh
+        sudo ./vps-setup.sh
+        ```
+        
+        ### 2. Deploy Application Files
+        ```bash
+        # Clone repository to VPS
+        cd /var/www/mybestlife
+        git clone https://github.com/Cryptovee252/my-best-life-platform.git .
+        
+        # Copy files to correct locations
+        cp -r vps-deployment/* .
+        
+        # Install dependencies
+        cd backend
+        npm install --production
+        ```
+        
+        ### 3. Configure Environment
+        ```bash
+        # Copy environment template
+        cp backend/.env.template backend/.env
+        # Edit with your actual values
+        nano backend/.env
+        ```
+        
+        ### 4. Start Application
+        ```bash
+        # Start with PM2
+        pm2 start app-production.js --name mybestlife
+        pm2 save
+        pm2 startup
+        ```
+        
+        ### 5. Get SSL Certificate
+        ```bash
+        # Get SSL certificate
+        certbot --nginx -d mybestlifeapp.com -d www.mybestlifeapp.com
+        ```
+        
+        ## Domain Configuration
+        
+        Update your domain DNS to point to your VPS IP:
+        - A record: @ → YOUR_VPS_IP
+        - A record: www → YOUR_VPS_IP
+        
+        ## Monitoring
+        
+        ```bash
+        # Check application status
+        pm2 status
+        
+        # View logs
+        pm2 logs mybestlife
+        
+        # Restart application
+        pm2 restart mybestlife
+        ```
+        
+        ## File Locations
+        
+        - Application: `/var/www/mybestlife`
+        - Nginx config: `/etc/nginx/sites-available/mybestlife`
+        - Environment: `/var/www/mybestlife/backend/.env`
+        - Logs: `pm2 logs mybestlife`
+        EOF
+        
+        echo "✅ VPS deployment package prepared!"
+        ls -la vps-deployment/
+        
+    - name: Create deployment archive
+      run: |
+        cd vps-deployment
+        tar -czf ../mybestlife-vps-deployment.tar.gz .
+        
+    - name: Upload VPS deployment package
+      uses: actions/upload-artifact@v4
+      with:
+        name: vps-deployment
+        path: mybestlife-vps-deployment.tar.gz
+        retention-days: 30
+        
+    - name: Deploy to VPS via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          # Navigate to application directory
+          cd /var/www/mybestlife
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Install dependencies
+          cd backend
+          npm install --production
+          
+          # Restart application
+          pm2 restart mybestlife || pm2 start app-production.js --name mybestlife
+          
+          echo "✅ VPS deployment complete!"
+          
+    - name: Deployment Status
+      run: |
+        echo "🚀 VPS deployment completed!"
+        echo "🌐 Your app should be live at: https://mybestlifeapp.com"
+        echo "📋 Check VPS deployment package for manual setup instructions"
