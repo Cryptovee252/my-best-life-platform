@@ -22,10 +22,10 @@ jobs:
         cp HelpMyBestLife/hostinger-deploy/index-modern.html deployment-package/index.html
         cp HelpMyBestLife/hostinger-deploy/register-modern.html deployment-package/register.html
         cp HelpMyBestLife/hostinger-deploy/login-modern.html deployment-package/login.html
-        cp HelpMyBestLife/hostinger-deploy/verify-email.html deployment-package/
-        cp HelpMyBestLife/hostinger-deploy/reset-password.html deployment-package/
-        cp HelpMyBestLife/hostinger-deploy/MBL_Logo.webp deployment-package/
-        cp HelpMyBestLife/hostinger-deploy/favicon.ico deployment-package/
+        cp HelpMyBestLife/hostinger-deploy/verify-email.html deployment-package/verify-email.html
+        cp HelpMyBestLife/hostinger-deploy/reset-password.html deployment-package/reset-password.html
+        cp HelpMyBestLife/hostinger-deploy/MBL_Logo.webp deployment-package/MBL_Logo.webp
+        cp HelpMyBestLife/hostinger-deploy/favicon.ico deployment-package/favicon.ico
         
         # Copy backend files
         cp -r backend deployment-package/
