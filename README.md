@@ -1,6 +1,15 @@
 # HelpMyBestLife Platform
 
+[![CI/CD](https://github.com/Cryptovee252/my-best-life-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Cryptovee252/my-best-life-platform/actions/workflows/ci.yml)
+[![Deploy](https://github.com/Cryptovee252/my-best-life-platform/actions/workflows/deploy.yml/badge.svg)](https://github.com/Cryptovee252/my-best-life-platform/actions/workflows/deploy.yml)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![GitHub stars](https://img.shields.io/github/stars/Cryptovee252/my-best-life-platform.svg)](https://github.com/Cryptovee252/my-best-life-platform/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Cryptovee252/my-best-life-platform.svg)](https://github.com/Cryptovee252/my-best-life-platform/network)
+
 A comprehensive React Native/Expo app focused on personal development through commitment points (CP) across three categories: Mind, Body, and Soul.
+
+🌐 **Live Demo**: [View on GitHub Pages](https://cryptovee252.github.io/my-best-life-platform/)  
+📱 **Repository**: [GitHub Repository](https://github.com/Cryptovee252/my-best-life-platform)
 
 ## 🚀 Features
 
@@ -281,13 +290,62 @@ npm test
 2. Deploy to cloud platform (Heroku, AWS, etc.)
 3. Configure MongoDB connection
 
+## 🔄 GitHub Workflow
+
+### Getting Started with Git
+```bash
+# Clone the repository
+git clone https://github.com/Cryptovee252/my-best-life-platform.git
+cd my-best-life-platform
+
+# Install dependencies
+cd HelpMyBestLife && npm install
+cd ../backend && npm install
+```
+
+### Making Changes
+```bash
+# Create a new branch for your feature
+git checkout -b feature/your-feature-name
+
+# Make your changes, then commit
+git add .
+git commit -m "Add: your feature description"
+
+# Push to GitHub
+git push origin feature/your-feature-name
+```
+
+### Pull Request Process
+1. **Fork** the repository on GitHub
+2. **Clone** your fork locally
+3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+4. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+5. **Push** to your branch (`git push origin feature/amazing-feature`)
+6. **Open** a Pull Request on GitHub
+
+### Branch Strategy
+- `main` - Production-ready code
+- `develop` - Development branch for features
+- `feature/*` - Individual features
+- `hotfix/*` - Critical bug fixes
+
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
 4. Add tests if applicable
-5. Submit a pull request
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Development Guidelines
+- Follow the existing code style
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure all CI checks pass
 
 ## 📄 License
 

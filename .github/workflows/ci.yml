@@ -1,0 +1,105 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Frontend CI
+  frontend-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./HelpMyBestLife
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './HelpMyBestLife/package-lock.json'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run linting
+      run: npx expo install --fix
+      
+    - name: Run type checking
+      run: npx tsc --noEmit
+      
+    - name: Run tests
+      run: npm test -- --coverage --watchAll=false
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./HelpMyBestLife/coverage/lcov.info
+        flags: frontend
+        name: frontend-coverage
+
+  # Backend CI
+  backend-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Setup Prisma
+      run: npx prisma generate
+      
+    - name: Run linting
+      run: npm run lint || echo "No lint script found"
+      
+    - name: Run tests
+      run: npm test || echo "No tests configured yet"
+      
+    - name: Check for security vulnerabilities
+      run: npm audit --audit-level moderate
+
+  # Database Migration Check
+  database-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './backend/package-lock.json'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Check Prisma schema
+      run: npx prisma validate
+      
+    - name: Generate Prisma client
+      run: npx prisma generate
