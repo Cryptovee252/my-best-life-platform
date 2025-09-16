@@ -36,13 +36,13 @@ jobs:
           "name": "mybestlife-backend",
           "version": "1.0.0",
           "description": "Backend for My Best Life app",
-          "main": "app.js",
+          "main": "app-production.js",
           "scripts": {
-            "start": "node app.js",
-            "dev": "nodemon app.js",
+            "start": "node app-production.js",
+            "dev": "nodemon app-production.js",
             "db:generate": "prisma generate",
             "db:push": "prisma db push",
-            "deploy": "npm install --production && npx prisma generate && pm2 start app.js --name mybestlife"
+            "deploy": "npm install --production && pm2 start app-production.js --name mybestlife"
           },
           "dependencies": {
             "@prisma/client": "^5.7.1",
@@ -63,6 +63,10 @@ jobs:
           }
         }
         EOF
+        
+        # Copy production files
+        cp backend/app-production.js deployment-package/backend/
+        cp backend/routes/auth-production.js deployment-package/backend/routes/
         
         # Create environment template
         cat > deployment-package/backend/.env.template << 'EOF'
@@ -109,7 +113,7 @@ jobs:
         
         # Start application with PM2
         echo "Starting application with PM2..."
-        pm2 start app.js --name "mybestlife"
+        pm2 start app-production.js --name "mybestlife"
         
         # Save PM2 configuration
         pm2 save
@@ -148,7 +152,7 @@ jobs:
         
         ### 3. Enable Node.js
         - In Hostinger control panel: Hosting → Manage → Advanced → Node.js
-        - Set entry point to: `backend/app.js`
+        - Set entry point to: `backend/app-production.js`
         - Set Node.js version to 18.x or higher
         
         ### 4. Setup Database
@@ -161,8 +165,7 @@ jobs:
           ```bash
           cd backend
           npm install --production
-          npx prisma generate
-          pm2 start app.js --name "mybestlife"
+          pm2 start app-production.js --name "mybestlife"
           ```
         
         ## Environment Variables (.env)
