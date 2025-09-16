@@ -1,0 +1,161 @@
+name: Direct Hostinger Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Build frontend
+      run: |
+        cd HelpMyBestLife
+        npm ci
+        npx expo export:web --output-dir ../hostinger-deploy
+        
+    - name: Prepare deployment files
+      run: |
+        # Create deployment directory
+        mkdir -p deployment-package
+        
+        # Copy frontend files from hostinger-deploy
+        cp HelpMyBestLife/hostinger-deploy/index.html deployment-package/
+        cp HelpMyBestLife/hostinger-deploy/register-modern.html deployment-package/register.html
+        cp HelpMyBestLife/hostinger-deploy/login-modern.html deployment-package/login.html
+        cp HelpMyBestLife/hostinger-deploy/verify-email.html deployment-package/
+        cp HelpMyBestLife/hostinger-deploy/reset-password.html deployment-package/
+        cp HelpMyBestLife/hostinger-deploy/MBL_Logo.webp deployment-package/
+        cp HelpMyBestLife/hostinger-deploy/favicon.ico deployment-package/
+        
+        # Copy backend files
+        cp -r backend deployment-package/
+        
+        # Create production package.json for backend
+        cat > deployment-package/backend/package.json << 'EOF'
+        {
+          "name": "mybestlife-backend",
+          "version": "1.0.0",
+          "description": "Backend for My Best Life app",
+          "main": "app.js",
+          "scripts": {
+            "start": "node app.js",
+            "dev": "nodemon app.js",
+            "db:generate": "prisma generate",
+            "db:push": "prisma db push",
+            "deploy": "npm install --production && npx prisma generate && pm2 start app.js --name mybestlife"
+          },
+          "dependencies": {
+            "@prisma/client": "^5.7.1",
+            "bcryptjs": "^3.0.2",
+            "body-parser": "^2.2.0",
+            "cors": "^2.8.5",
+            "dotenv": "^16.5.0",
+            "express": "^4.18.2",
+            "jsonwebtoken": "^9.0.2",
+            "nodemailer": "^6.9.0",
+            "pg": "^8.16.3"
+          },
+          "devDependencies": {
+            "prisma": "^5.7.1"
+          },
+          "engines": {
+            "node": ">=18.0.0"
+          }
+        }
+        EOF
+        
+        # Create environment template
+        cat > deployment-package/backend/.env.template << 'EOF'
+        # My Best Life - Environment Configuration Template
+        # Copy this file to .env and fill in your actual values
+        
+        # Database Configuration
+        DATABASE_URL="postgresql://username:password@host:port/database"
+        
+        # JWT Configuration
+        JWT_SECRET="your-super-secret-jwt-key-here"
+        
+        # Email Configuration (Gmail example)
+        SMTP_HOST="smtp.gmail.com"
+        SMTP_PORT=587
+        SMTP_USER="your-email@gmail.com"
+        SMTP_PASS="your-app-password"
+        
+        # Frontend URL
+        FRONTEND_URL="https://mybestlifeapp.com"
+        
+        # Node Environment
+        NODE_ENV="production"
+        EOF
+        
+        # Create startup script
+        cat > deployment-package/start-app.sh << 'EOF'
+        #!/bin/bash
+        
+        echo "🚀 Starting My Best Life application..."
+        
+        # Navigate to backend directory
+        cd backend
+        
+        # Install dependencies if not already installed
+        if [ ! -d "node_modules" ]; then
+            echo "Installing dependencies..."
+            npm install --production
+        fi
+        
+        # Generate Prisma client
+        echo "Generating Prisma client..."
+        npx prisma generate
+        
+        # Start application with PM2
+        echo "Starting application with PM2..."
+        pm2 start app.js --name "mybestlife"
+        
+        # Save PM2 configuration
+        pm2 save
+        
+        echo "✅ Application started successfully!"
+        echo "📊 Check status with: pm2 status"
+        echo "📝 View logs with: pm2 logs mybestlife"
+        EOF
+        
+        chmod +x deployment-package/start-app.sh
+        
+        echo "✅ Deployment package prepared successfully!"
+        ls -la deployment-package/
+        
+    - name: Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.HOSTINGER_FTP_HOST }}
+        username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+        password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+        local-dir: ./deployment-package/
+        server-dir: ./public_html/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.env
+          **/.env.*
+          
+    - name: Deployment Status
+      run: |
+        echo "🚀 Deployment completed!"
+        echo "🌐 Your app should be live at: https://mybestlifeapp.com"
+        echo "📋 Files deployed to Hostinger public_html directory"
+        echo "📝 Next steps:"
+        echo "   1. Configure .env file on Hostinger"
+        echo "   2. Set up Node.js entry point: backend/app.js"
+        echo "   3. Run: ./start-app.sh on Hostinger"

@@ -22,6 +22,9 @@ jobs:
       run: |
         cd HelpMyBestLife
         chmod +x deploy-to-hostinger.sh
+        # Fix the script to use correct paths
+        sed -i 's|FRONTEND_DIR="hostinger-deploy"|FRONTEND_DIR="./hostinger-deploy"|g' deploy-to-hostinger.sh
+        sed -i 's|BACKEND_DIR="../backend"|BACKEND_DIR="../backend"|g' deploy-to-hostinger.sh
         ./deploy-to-hostinger.sh
         
     - name: Deploy to Hostinger via FTP
