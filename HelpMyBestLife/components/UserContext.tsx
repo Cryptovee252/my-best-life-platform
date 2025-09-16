@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from '@/services/authService';
 
@@ -7,6 +7,10 @@ import authService from '@/services/authService';
 const safeAsyncStorage = {
   getItem: async (key: string): Promise<string | null> => {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        return null;
+      }
       return await AsyncStorage.getItem(key);
     } catch (error) {
       console.error('AsyncStorage getItem error:', error);
@@ -15,6 +19,10 @@ const safeAsyncStorage = {
   },
   setItem: async (key: string, value: string): Promise<void> => {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
       await AsyncStorage.setItem(key, value);
     } catch (error) {
       console.error('AsyncStorage setItem error:', error);
@@ -23,6 +31,10 @@ const safeAsyncStorage = {
   },
   removeItem: async (key: string): Promise<void> => {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
       await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error('AsyncStorage removeItem error:', error);
@@ -145,11 +157,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Load user data from AsyncStorage and check authentication status
   useEffect(() => {
-    checkAuthStatus().catch(err => {
-      console.error('Failed to check auth status:', err);
-      setError(err.message);
+    // Only run on client side
+    if (typeof window === 'undefined') {
       setIsLoading(false);
-    });
+      return;
+    }
+    
+    // Add a small delay for web to ensure proper hydration
+    const timer = setTimeout(() => {
+      checkAuthStatus().catch(err => {
+        console.error('Failed to check auth status:', err);
+        setError(err.message);
+        setIsLoading(false);
+      });
+    }, Platform.OS === 'web' ? 200 : 0);
+    
+    return () => clearTimeout(timer);
 
     // Cleanup function to clear timeout on unmount
     return () => {

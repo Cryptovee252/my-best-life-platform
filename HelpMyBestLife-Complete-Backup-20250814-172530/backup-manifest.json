@@ -1,0 +1,147 @@
+{
+  "backup_info": {
+    "name": "HelpMyBestLife-Complete-Backup-20250814-172530",
+    "created": "2025-08-14 17:25:30",
+    "version": "1.0",
+    "description": "Complete HelpMyBestLife Development Environment Backup (Includes Complete Dev Platform)"
+  },
+  "files": [
+    {
+      "name": "dev-setup.py",
+      "type": "file",
+      "size": 174938
+    },
+    {
+      "name": "launch-dev-manager.py",
+      "type": "file",
+      "size": 2797
+    },
+    {
+      "name": "launch-dev-manager.sh",
+      "type": "file",
+      "size": 1275
+    },
+    {
+      "name": "launch-dev-manager.bat",
+      "type": "file",
+      "size": 1195
+    },
+    {
+      "name": "macos-launcher.command",
+      "type": "file",
+      "size": 1784
+    },
+    {
+      "name": "Launch Dev Manager.applescript",
+      "type": "file",
+      "size": 1174
+    },
+    {
+      "name": "requirements.txt",
+      "type": "file",
+      "size": 451
+    },
+    {
+      "name": "package.json",
+      "type": "file",
+      "size": 495
+    },
+    {
+      "name": "package-lock.json",
+      "type": "file",
+      "note": "Large file - reinstall with npm install"
+    },
+    {
+      "name": "tsconfig.json",
+      "type": "file",
+      "size": 63
+    },
+    {
+      "name": "app.json",
+      "type": "file",
+      "size": 59
+    },
+    {
+      "name": "docker-compose.yml",
+      "type": "file",
+      "size": 310
+    },
+    {
+      "name": "dev-config.json",
+      "type": "file",
+      "size": 83
+    },
+    {
+      "name": "dev-report-20250810-160504.txt",
+      "type": "file",
+      "size": 408
+    },
+    {
+      "name": "MBL_Logo.webp",
+      "type": "file",
+      "size": 18016
+    },
+    {
+      "name": "README.md",
+      "type": "file",
+      "size": 8167
+    },
+    {
+      "name": "README-DEV-MANAGER.md",
+      "type": "file",
+      "size": 6460
+    },
+    {
+      "name": "QUICK-START.md",
+      "type": "file",
+      "size": 4059
+    },
+    {
+      "name": "PLATFORM-ENHANCEMENTS.md",
+      "type": "file",
+      "size": 7742
+    }
+  ],
+  "directories": [
+    {
+      "name": "backend",
+      "type": "project_directory",
+      "note": "Excludes node_modules - reinstall with npm install"
+    },
+    {
+      "name": "HelpMyBestLife",
+      "type": "project_directory",
+      "note": "Excludes node_modules - reinstall with npm install"
+    },
+    {
+      "name": "prisma",
+      "type": "directory"
+    },
+    {
+      "name": ".vscode",
+      "type": "directory"
+    },
+    {
+      "name": ".expo",
+      "type": "directory"
+    },
+    {
+      "name": "dev-env",
+      "type": "directory"
+    }
+  ],
+  "restore_instructions": [
+    "1. Extract the backup to a new location",
+    "2. Navigate to the backup directory",
+    "3. Run the appropriate launcher for your platform:",
+    "   - Windows: launch-dev-manager.bat",
+    "   - macOS: macos-launcher.command",
+    "   - Linux: launch-dev-manager.sh",
+    "4. The launcher will automatically:",
+    "   - Restore your complete development platform",
+    "   - Create a new virtual environment",
+    "   - Install required dependencies",
+    "   - Set up the development environment"
+  ],
+  "note": "This is a complete backup containing your entire development platform and all project files. For a smaller backup with just core files, use 'Create Quick Backup'."
+}

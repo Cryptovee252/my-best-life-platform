@@ -1,11 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// For production, use the VPS URL with HTTPS
 // For local development, use localhost
-// For mobile development on device, use your computer's IP address instead of localhost
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://mybestlifeapp.com/api';
 
 // Alternative: Use environment variable if available
-// const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+// const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://mybestlifeapp.com/api';
 
 export interface AuthUser {
   _id: string;
@@ -55,11 +55,19 @@ class AuthService {
   private user: AuthUser | null = null;
 
   constructor() {
-    this.loadStoredAuth();
+    // Only load stored auth on client side
+    if (typeof window !== 'undefined') {
+      this.loadStoredAuth();
+    }
   }
 
   private async loadStoredAuth() {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
       const storedToken = await AsyncStorage.getItem('auth_token');
       const storedUser = await AsyncStorage.getItem('auth_user');
       

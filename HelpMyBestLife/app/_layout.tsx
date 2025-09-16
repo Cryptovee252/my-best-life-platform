@@ -3,9 +3,10 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { CommitmentProvider } from '@/components/CommitmentContext';
@@ -34,6 +35,8 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
+  const [isWebReady, setIsWebReady] = useState(false);
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -45,7 +48,20 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
+  // Web-specific hydration handling
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // Ensure DOM is ready before rendering
+      const timer = setTimeout(() => {
+        setIsWebReady(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsWebReady(true);
+    }
+  }, []);
+
+  if (!loaded || !isWebReady) {
     return null;
   }
 

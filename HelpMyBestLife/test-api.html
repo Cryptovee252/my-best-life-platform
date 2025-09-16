@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 10px 0; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>My Best Life API Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Registration</h2>
+        <input type="text" id="regName" placeholder="Name" value="Test User">
+        <input type="text" id="regUsername" placeholder="Username" value="testuser123">
+        <input type="email" id="regEmail" placeholder="Email" value="testuser123@example.com">
+        <input type="password" id="regPassword" placeholder="Password" value="testpass123">
+        <br>
+        <button onclick="testRegister()">Test Registration</button>
+        <div id="regResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Login</h2>
+        <input type="email" id="loginEmail" placeholder="Email" value="testuser123@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="testpass123">
+        <br>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test API Health</h2>
+        <button onclick="testHealth()">Test Health Check</button>
+        <div id="healthResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://mybestlifeapp.com/api';
+        
+        async function testRegister() {
+            const resultDiv = document.getElementById('regResult');
+            resultDiv.innerHTML = 'Testing registration...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('regName').value,
+                        username: document.getElementById('regUsername').value,
+                        email: document.getElementById('regEmail').value,
+                        password: document.getElementById('regPassword').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Registration successful! User ID: ${data.user.id}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Registration failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ Login successful! Welcome ${data.user.name}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.innerHTML = 'Testing health check...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">✅ API is healthy! Status: ${data.status}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Health check failed: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

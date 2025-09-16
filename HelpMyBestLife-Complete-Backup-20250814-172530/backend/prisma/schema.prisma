@@ -1,0 +1,300 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://mybestlife:devpassword@localhost:5432/mybestlife"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  username   String   @unique
+  email      String   @unique
+  phone      String?  @unique
+  password   String
+  profilePic String?  // URL to profile picture
+  dailyCP    Int      @default(0)
+  lifetimeCP Int      @default(0)
+  daysActive Int      @default(1)
+  startDate  String   @default(dbgenerated("CURRENT_DATE"))
+  lastActiveDate String @default(dbgenerated("CURRENT_DATE"))
+  isOnline   Boolean  @default(false)
+  lastSeen   DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  tasks          Task[]
+  notifications  Notification[]
+  createdGroups  Group[] @relation("GroupCreator")
+  stories        Story[]
+  comments       Comment[]
+  
+  // Group relationships
+  groupMemberships GroupMember[]
+  groupStories     GroupStory[]
+  groupStoryComments GroupStoryComment[]
+  groupStoryLikes   GroupStoryLike[]
+  groupMessages     GroupMessage[]
+  groupMessageReactions GroupMessageReaction[]
+  groupTasks        GroupTask[] @relation("GroupTaskAssignee")
+  createdGroupTasks GroupTask[] @relation("GroupTaskCreator")
+  groupInvitations  GroupInvitation[] @relation("GroupInviter")
+  receivedGroupInvitations GroupInvitation[] @relation("GroupInvitee")
+
+  @@map("users")
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @default("")
+  category      String
+  dueDate       DateTime?
+  priority      String    @default("medium")
+  estimatedTime Int       @default(0)
+  completed     Boolean   @default(false)
+  userId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  category    String   // 'mind', 'body', 'soul', 'mixed'
+  isPrivate   Boolean  @default(false)
+  maxMembers  Int      @default(100)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator User @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  members GroupMember[]
+  stories GroupStory[]
+  messages GroupMessage[]
+  tasks GroupTask[]
+  invitations GroupInvitation[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String   @default("member") // 'admin', 'moderator', 'member'
+  joinedAt  DateTime @default(now())
+  isActive  Boolean  @default(true)
+  
+  // Group-specific CP tracking
+  groupCP   Int      @default(0)
+  dailyCP   Int      @default(0)
+  weeklyCP  Int      @default(0)
+  monthlyCP Int      @default(0)
+  
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_members")
+}
+
+model GroupStory {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  author      String
+  avatarUrl   String?
+  imageUrl    String?
+  caption     String?
+  category    String   // 'mind', 'body', 'soul'
+  groupId     String
+  userId      String
+  likesCount  Int      @default(0)
+  commentsCount Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments GroupStoryComment[]
+  likes GroupStoryLike[]
+
+  @@map("group_stories")
+}
+
+model GroupStoryComment {
+  id        String   @id @default(cuid())
+  content   String
+  author    String
+  avatarUrl String?
+  storyId   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  story GroupStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("group_story_comments")
+}
+
+model GroupStoryLike {
+  id      String @id @default(cuid())
+  storyId String
+  userId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  story GroupStory @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, userId])
+  @@map("group_story_likes")
+}
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  content   String
+  author    String
+  avatarUrl String?
+  groupId   String
+  userId    String
+  messageType String @default("text") // 'text', 'image', 'file', 'system'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions GroupMessageReaction[]
+
+  @@map("group_messages")
+}
+
+model GroupMessageReaction {
+  id        String @id @default(cuid())
+  messageId String
+  userId    String
+  reaction  String // emoji or reaction type
+  createdAt DateTime @default(now())
+
+  // Relations
+  message GroupMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, reaction])
+  @@map("group_message_reactions")
+}
+
+model GroupTask {
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @default("")
+  category      String    // 'mind', 'body', 'soul'
+  dueDate       DateTime?
+  priority      String    @default("medium")
+  estimatedTime Int       @default(0)
+  completed     Boolean   @default(false)
+  groupId       String
+  assignedTo    String?   // userId
+  createdBy     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  assignee User? @relation("GroupTaskAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  creator User @relation("GroupTaskCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("group_tasks")
+}
+
+model GroupInvitation {
+  id        String   @id @default(cuid())
+  groupId   String
+  invitedBy String
+  invitedEmail String?
+  invitedUserId String?
+  status    String   @default("pending") // 'pending', 'accepted', 'declined', 'expired'
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  inviter User @relation("GroupInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+  invitee User? @relation("GroupInvitee", fields: [invitedUserId], references: [id], onDelete: SetNull)
+
+  @@map("group_invitations")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  data      Json     @default("{}")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Story {
+  id          String   @id @default(cuid())
+  title       String
+  author      String
+  avatarUrl   String?
+  cp          Int      @default(0)
+  date        String
+  time        String
+  imageUrl    String?
+  description String
+  commentsCount Int    @default(0)
+  liked       Boolean  @default(false)
+  caption     String?
+  category    String?  // 'mind', 'body', 'soul'
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments Comment[]
+
+  @@map("stories")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  author    String
+  avatarUrl String?
+  storyId   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+} 
