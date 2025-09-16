@@ -1,0 +1,87 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://mybestlife:devpassword@localhost:5432/mybestlife_db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  username   String   @unique
+  email      String   @unique
+  phone      String?  @unique
+  password   String
+  profilePic String?  // URL to profile picture
+  dailyCP    Int      @default(0)
+  lifetimeCP Int      @default(0)
+  daysActive Int      @default(1)
+  startDate  String   @default(dbgenerated("CURRENT_DATE"))
+  lastActiveDate String @default(dbgenerated("CURRENT_DATE"))
+  isOnline   Boolean  @default(false)
+  lastSeen   DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  tasks          Task[]
+  groups         Group[] @relation("GroupMembers")
+  notifications  Notification[]
+  createdGroups  Group[] @relation("GroupCreator")
+
+  @@map("users")
+}
+
+model Task {
+  id            String    @id @default(cuid())
+  title         String
+  description   String    @default("")
+  category      String
+  dueDate       DateTime?
+  priority      String    @default("medium")
+  estimatedTime Int       @default(0)
+  completed     Boolean   @default(false)
+  userId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  category    String
+  isPrivate   Boolean  @default(false)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator User @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  members User[] @relation("GroupMembers")
+
+  @@map("groups")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  data      Json     @default("{}")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+} 

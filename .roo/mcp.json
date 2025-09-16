@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "video-analysis": {
+      "command": "node",
+      "args": ["../Cline/MCP/video-analysis-server/build/index.js"],
+      "cwd": "../Cline/MCP/video-analysis-server",
+      "env": {},
+      "disabled": false,
+      "alwaysAllow": [],
+      "timeout": 120000
+    }
+  }
+}

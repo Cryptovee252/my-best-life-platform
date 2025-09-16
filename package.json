@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "@react-navigation/material-top-tabs": "^7.2.13",
+    "expo": "^53.0.9",
+    "expo-image-picker": "~16.1.4",
+    "react-native-tab-view": "^4.1.0",
+    "react": "19.0.0",
+    "react-native": "0.79.3"
+  },
+  "devDependencies": {
+    "@types/react": "~19.0.10",
+    "prisma": "^6.8.2",
+    "typescript": "~5.8.3"
+  },
+  "name": "New",
+  "version": "1.0.0",
+  "scripts": {
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  }
+}
