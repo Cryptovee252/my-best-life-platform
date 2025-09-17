@@ -216,7 +216,7 @@ export default function DashboardScreen() {
           },
         ]}
       >
-        {/* Header */}
+        {/* Header - Updated for v2.0 */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Image
