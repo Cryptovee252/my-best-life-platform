@@ -1,6 +1,136 @@
+# 🚨 MANUAL VPS SECURITY DEPLOYMENT
+## Step-by-Step Instructions to Secure Your Live VPS
+
+**URGENT**: Your VPS is currently vulnerable. Follow these manual steps to secure it immediately.
+
+---
+
+## 🔧 PREPARATION
+
+### **Step 1: Connect to Your VPS**
+```bash
+# SSH into your VPS (it will ask for your password)
+ssh your-username@your-vps-ip-address
+```
+
+### **Step 2: Find Your Website Directory**
+```bash
+# Common locations (try these):
+ls /var/www/html/
+ls /var/www/mybestlifeapp.com/
+ls /home/your-username/public_html/
+ls /home/your-username/www/
+```
+
+### **Step 3: Navigate to Your Website Directory**
+```bash
+# Replace with your actual path
+cd /var/www/html
+# OR
+cd /home/your-username/public_html
+```
+
+---
+
+## 🛡️ SECURITY DEPLOYMENT
+
+### **Step 1: Create Backup**
+```bash
+# Backup your current config.php
+cp config.php config.php.backup.$(date +%Y%m%d_%H%M%S)
+```
+
+### **Step 2: Create Logs Directory**
+```bash
+mkdir -p logs
+chmod 755 logs
+```
+
+### **Step 3: Generate Secure Secrets**
+```bash
+# Generate secure JWT secret
+php -r "echo 'JWT_SECRET=' . bin2hex(random_bytes(32)) . PHP_EOL;"
+
+# Generate session secret
+php -r "echo 'SESSION_SECRET=' . bin2hex(random_bytes(16)) . PHP_EOL;"
+```
+
+**Copy the generated secrets - you'll need them!**
+
+### **Step 4: Create Secure .env File**
+```bash
+nano .env
+```
+
+**Paste this content and edit with your actual values:**
+```env
+# My Best Life Platform - Secure Environment Variables
+# Generated on $(date)
+
+# Database Configuration - UPDATE THESE WITH YOUR ACTUAL VALUES
+DB_HOST=localhost
+DB_NAME=your_actual_database_name
+DB_USER=your_actual_username
+DB_PASS=your_actual_password
+DB_PORT=3306
+
+# JWT Security - USE THE GENERATED SECRETS FROM STEP 3
+JWT_SECRET=PASTE_YOUR_GENERATED_JWT_SECRET_HERE
+JWT_EXPIRY=86400
+VERIFICATION_EXPIRY=86400
+RESET_EXPIRY=3600
+
+# Email Configuration - UPDATE WITH YOUR ACTUAL VALUES
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-actual-gmail@gmail.com
+SMTP_PASS=your-actual-gmail-app-password
+SMTP_FROM_NAME=My Best Life
+SMTP_FROM_EMAIL=your-actual-gmail@gmail.com
+
+# Application Settings
+APP_NAME=My Best Life
+APP_VERSION=1.0.0
+APP_ENV=production
+FRONTEND_URL=https://mybestlifeapp.com
+
+# Security Settings
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=5
+RATE_LIMIT_MAX_API_REQUESTS=100
+MIN_PASSWORD_LENGTH=8
+REQUIRE_UPPERCASE=true
+REQUIRE_LOWERCASE=true
+REQUIRE_NUMBERS=true
+REQUIRE_SYMBOLS=true
+MAX_LOGIN_ATTEMPTS=5
+LOCKOUT_DURATION_MINUTES=15
+SESSION_SECRET=PASTE_YOUR_GENERATED_SESSION_SECRET_HERE
+COOKIE_SECURE=true
+COOKIE_HTTP_ONLY=true
+COOKIE_SAME_SITE=strict
+FORCE_HTTPS=true
+ENABLE_SECURITY_LOGGING=true
+ENABLE_AUDIT_LOGGING=true
+```
+
+**Save the file**: `Ctrl+X`, then `Y`, then `Enter`
+
+### **Step 5: Set Secure Permissions**
+```bash
+chmod 600 .env
+```
+
+### **Step 6: Update config.php**
+```bash
+nano config.php
+```
+
+**Replace the entire content with this secure version:**
+```php
 <?php
-// My Best Life Platform - Secure PHP Configuration
-// This file contains all configuration settings using environment variables
+// My Best Life Platform - SECURE VPS Configuration
+// URGENT: Deploy this to replace your current config.php
 
 // Load environment variables from .env file
 if (file_exists(__DIR__ . '/.env')) {
@@ -14,14 +144,14 @@ if (file_exists(__DIR__ . '/.env')) {
     }
 }
 
-// Database Configuration
+// Database Configuration - SECURE
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'mybestlife_db');
 define('DB_USER', $_ENV['DB_USER'] ?? 'mybestlife_user');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_PORT', $_ENV['DB_PORT'] ?? '3306');
 
-// JWT Secret Key (MUST be set in environment variables)
+// JWT Secret Key - CRITICAL SECURITY
 define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? '');
 
 // Email Configuration
@@ -41,14 +171,14 @@ define('APP_VERSION', $_ENV['APP_VERSION'] ?? '1.0.0');
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
 
 // Security Settings
-define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400); // 24 hours in seconds
-define('VERIFICATION_EXPIRY', $_ENV['VERIFICATION_EXPIRY'] ?? 86400); // 24 hours for email verification
-define('RESET_EXPIRY', $_ENV['RESET_EXPIRY'] ?? 3600); // 1 hour for password reset
+define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400);
+define('VERIFICATION_EXPIRY', $_ENV['VERIFICATION_EXPIRY'] ?? 86400);
+define('RESET_EXPIRY', $_ENV['RESET_EXPIRY'] ?? 3600);
 
 // Rate Limiting Settings
-define('RATE_LIMIT_WINDOW_MS', $_ENV['RATE_LIMIT_WINDOW_MS'] ?? 900000); // 15 minutes
-define('RATE_LIMIT_MAX_REQUESTS', $_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 5); // 5 attempts per window
-define('RATE_LIMIT_MAX_API_REQUESTS', $_ENV['RATE_LIMIT_MAX_API_REQUESTS'] ?? 100); // 100 API requests per window
+define('RATE_LIMIT_WINDOW_MS', $_ENV['RATE_LIMIT_WINDOW_MS'] ?? 900000);
+define('RATE_LIMIT_MAX_REQUESTS', $_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 5);
+define('RATE_LIMIT_MAX_API_REQUESTS', $_ENV['RATE_LIMIT_MAX_API_REQUESTS'] ?? 100);
 
 // Password Policy Settings
 define('MIN_PASSWORD_LENGTH', $_ENV['MIN_PASSWORD_LENGTH'] ?? 8);
@@ -67,7 +197,7 @@ define('COOKIE_SECURE', $_ENV['COOKIE_SECURE'] ?? 'true');
 define('COOKIE_HTTP_ONLY', $_ENV['COOKIE_HTTP_ONLY'] ?? 'true');
 define('COOKIE_SAME_SITE', $_ENV['COOKIE_SAME_SITE'] ?? 'strict');
 
-// Security Validation
+// CRITICAL SECURITY VALIDATION
 if (empty(JWT_SECRET)) {
     error_log('CRITICAL SECURITY ERROR: JWT_SECRET is not set in environment variables!');
     http_response_code(500);
@@ -88,7 +218,6 @@ date_default_timezone_set('UTC');
 
 // Secure session configuration
 if (session_status() === PHP_SESSION_NONE) {
-    // Configure secure session settings
     ini_set('session.cookie_secure', COOKIE_SECURE === 'true' ? '1' : '0');
     ini_set('session.cookie_httponly', COOKIE_HTTP_ONLY === 'true' ? '1' : '0');
     ini_set('session.cookie_samesite', COOKIE_SAME_SITE);
@@ -96,16 +225,12 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.sid_length', '48');
     ini_set('session.sid_bits_per_character', '6');
     
-    // Set session name
     session_name('MYBESTLIFE_SESSION');
-    
-    // Start session
     session_start();
     
-    // Regenerate session ID periodically for security
     if (!isset($_SESSION['last_regeneration'])) {
         $_SESSION['last_regeneration'] = time();
-    } elseif (time() - $_SESSION['last_regeneration'] > 300) { // 5 minutes
+    } elseif (time() - $_SESSION['last_regeneration'] > 300) {
         session_regenerate_id(true);
         $_SESSION['last_regeneration'] = time();
     }
@@ -178,7 +303,7 @@ function successResponse($message, $data = null, $statusCode = 200) {
     jsonResponse($response, $statusCode);
 }
 
-// JWT Functions (Simple implementation for shared hosting)
+// SECURE JWT Functions
 function generateJWT($payload) {
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
     $payload = json_encode($payload);
@@ -260,7 +385,108 @@ function logActivity($message, $level = 'INFO') {
     file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 }
 ?>
+```
 
+**Save the file**: `Ctrl+X`, then `Y`, then `Enter`
 
+### **Step 7: Create Security Headers (.htaccess)**
+```bash
+nano .htaccess
+```
 
+**Paste this content:**
+```apache
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header unset Server
+    Header unset X-Powered-By
+</IfModule>
 
+# Force HTTPS
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Block sensitive files
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+<Files ".git">
+    Order allow,deny
+    Deny from all
+</Files>
+<Files "composer.json">
+    Order allow,deny
+    Deny from all
+</Files>
+```
+
+**Save the file**: `Ctrl+X`, then `Y`, then `Enter`
+
+### **Step 8: Set Secure Permissions**
+```bash
+chmod 644 .htaccess
+```
+
+---
+
+## 🧪 TESTING
+
+### **Step 1: Test PHP Syntax**
+```bash
+php -l config.php
+```
+
+### **Step 2: Test Website**
+```bash
+# Test if website loads
+curl -I https://mybestlifeapp.com
+```
+
+### **Step 3: Check Logs**
+```bash
+# Monitor logs for any errors
+tail -f logs/app.log
+```
+
+---
+
+## ✅ SUCCESS INDICATORS
+
+**You'll know it's working when:**
+- ✅ Website loads without errors
+- ✅ Login/registration works
+- ✅ No PHP errors in logs
+- ✅ Security headers present (check browser dev tools)
+
+---
+
+## 🚨 EMERGENCY ROLLBACK
+
+**If something breaks:**
+```bash
+# Restore backup
+cp config.php.backup.* config.php
+
+# Remove .env if causing issues
+rm .env
+
+# Restart web server
+sudo systemctl restart apache2
+# OR
+sudo systemctl restart nginx
+```
+
+---
+
+**🛡️ YOUR VPS WILL BE SECURE AFTER COMPLETING THESE STEPS!**

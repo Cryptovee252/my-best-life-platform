@@ -1,9 +1,16 @@
 <?php
 require_once '../config.php';
+require_once '../includes/security-middleware.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     errorResponse('Method not allowed', 405);
+}
+
+// Check rate limiting
+$clientIP = SecurityMiddleware::getClientIP();
+if (!SecurityMiddleware::checkRateLimit("register_$clientIP", RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS)) {
+    errorResponse('Too many registration attempts. Please try again later.', 429);
 }
 
 // Get JSON input
@@ -22,25 +29,31 @@ foreach ($required_fields as $field) {
 }
 
 // Sanitize input
-$name = sanitizeInput($input['name']);
-$username = sanitizeInput($input['username']);
-$email = sanitizeInput($input['email']);
-$phone = isset($input['phone']) ? sanitizeInput($input['phone']) : null;
+$name = SecurityMiddleware::sanitizeInput($input['name']);
+$username = SecurityMiddleware::sanitizeInput($input['username']);
+$email = SecurityMiddleware::sanitizeInput($input['email']);
+$phone = isset($input['phone']) ? SecurityMiddleware::sanitizeInput($input['phone']) : null;
 $password = $input['password'];
 
 // Validate email format
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!SecurityMiddleware::validateEmail($email)) {
     errorResponse('Invalid email format');
 }
 
-// Validate password length
-if (strlen($password) < 6) {
-    errorResponse('Password must be at least 6 characters long');
+// Enhanced password validation
+$passwordErrors = SecurityMiddleware::validatePassword($password);
+if (!empty($passwordErrors)) {
+    errorResponse('Password does not meet requirements: ' . implode(', ', $passwordErrors));
 }
 
-// Validate username format (alphanumeric and underscores only)
-if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
-    errorResponse('Username can only contain letters, numbers, and underscores');
+// Validate username format
+if (!SecurityMiddleware::validateUsername($username)) {
+    errorResponse('Username must be 3-20 characters long and contain only letters, numbers, and underscores');
+}
+
+// Validate name length
+if (strlen($name) < 2 || strlen($name) > 50) {
+    errorResponse('Name must be between 2 and 50 characters long');
 }
 
 try {
@@ -63,11 +76,11 @@ try {
         errorResponse('Username already taken');
     }
 
-    // Hash password
-    $hashedPassword = hashPassword($password);
+    // Hash password with enhanced security
+    $hashedPassword = SecurityMiddleware::hashPassword($password);
 
-    // Generate verification token
-    $verificationToken = generateToken();
+    // Generate secure verification token
+    $verificationToken = SecurityMiddleware::generateSecureToken();
     $verificationExpires = date('Y-m-d H:i:s', time() + VERIFICATION_EXPIRY);
 
     // Insert new user
@@ -95,8 +108,13 @@ try {
     // Send welcome email
     $welcomeEmailSent = sendWelcomeEmail($user, $verificationToken);
 
-    // Log the registration
-    logActivity("User registered: $email (ID: $userId)", 'INFO');
+    // Log the registration with security event
+    SecurityMiddleware::logSecurityEvent('REGISTRATION_SUCCESS', [
+        'user_id' => $userId,
+        'email' => $email,
+        'username' => $username,
+        'ip' => $clientIP
+    ]);
 
     // Log email attempt
     $emailStatus = $welcomeEmailSent ? 'sent' : 'failed';
@@ -145,6 +163,7 @@ function sendWelcomeEmail($user, $verificationToken) {
     }
 }
 ?>
+
 
 
 

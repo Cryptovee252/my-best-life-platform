@@ -1,0 +1,81 @@
+# ===========================================
+# DATABASE CONFIGURATION
+# ===========================================
+DATABASE_URL="postgresql://mybestlife:your_secure_password_here@localhost:5432/mybestlife"
+
+# ===========================================
+# JWT SECURITY (CRITICAL - GENERATE NEW SECRETS)
+# ===========================================
+# Generate secure secrets using:
+# node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString('hex'))"
+# node -e "console.log('JWT_REFRESH_SECRET=' + require('crypto').randomBytes(64).toString('hex'))"
+JWT_SECRET="your-super-secure-jwt-secret-key-here-minimum-64-characters"
+JWT_REFRESH_SECRET="your-super-secure-refresh-secret-key-here-minimum-64-characters"
+JWT_EXPIRY="7d"
+JWT_REFRESH_EXPIRY="30d"
+
+# ===========================================
+# EMAIL CONFIGURATION
+# ===========================================
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-gmail-app-password"
+SMTP_FROM_NAME="My Best Life"
+SMTP_FROM_EMAIL="your-email@gmail.com"
+
+# ===========================================
+# APPLICATION CONFIGURATION
+# ===========================================
+NODE_ENV="production"
+PORT=3000
+FRONTEND_URL="https://mybestlifeapp.com"
+API_BASE_URL="https://mybestlifeapp.com/api"
+
+# ===========================================
+# SECURITY CONFIGURATION
+# ===========================================
+# Rate limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Password policy
+MIN_PASSWORD_LENGTH=8
+REQUIRE_UPPERCASE=true
+REQUIRE_LOWERCASE=true
+REQUIRE_NUMBERS=true
+REQUIRE_SYMBOLS=true
+
+# Account lockout
+MAX_LOGIN_ATTEMPTS=5
+LOCKOUT_DURATION_MINUTES=15
+
+# Session security
+SESSION_SECRET="your-session-secret-key-here-minimum-32-characters"
+COOKIE_SECURE=true
+COOKIE_HTTP_ONLY=true
+COOKIE_SAME_SITE="strict"
+
+# ===========================================
+# SSL/TLS CONFIGURATION
+# ===========================================
+SSL_CERT_PATH="/etc/ssl/certs/mybestlifeapp.com.crt"
+SSL_KEY_PATH="/etc/ssl/private/mybestlifeapp.com.key"
+FORCE_HTTPS=true
+
+# ===========================================
+# MONITORING & LOGGING
+# ===========================================
+LOG_LEVEL="info"
+LOG_FILE_PATH="/var/log/mybestlife/app.log"
+ENABLE_SECURITY_LOGGING=true
+ENABLE_AUDIT_LOGGING=true
+
+# ===========================================
+# BACKUP CONFIGURATION
+# ===========================================
+BACKUP_ENCRYPTION_KEY="your-backup-encryption-key-here"
+BACKUP_RETENTION_DAYS=30
+BACKUP_SCHEDULE="0 2 * * *"
+

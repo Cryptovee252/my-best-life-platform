@@ -1,6 +1,6 @@
 <?php
-// My Best Life Platform - Secure PHP Configuration
-// This file contains all configuration settings using environment variables
+// My Best Life Platform - SECURE VPS Configuration
+// URGENT: Deploy this to replace your current config.php
 
 // Load environment variables from .env file
 if (file_exists(__DIR__ . '/.env')) {
@@ -14,14 +14,14 @@ if (file_exists(__DIR__ . '/.env')) {
     }
 }
 
-// Database Configuration
+// Database Configuration - SECURE
 define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
 define('DB_NAME', $_ENV['DB_NAME'] ?? 'mybestlife_db');
 define('DB_USER', $_ENV['DB_USER'] ?? 'mybestlife_user');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_PORT', $_ENV['DB_PORT'] ?? '3306');
 
-// JWT Secret Key (MUST be set in environment variables)
+// JWT Secret Key - CRITICAL SECURITY
 define('JWT_SECRET', $_ENV['JWT_SECRET'] ?? '');
 
 // Email Configuration
@@ -41,14 +41,14 @@ define('APP_VERSION', $_ENV['APP_VERSION'] ?? '1.0.0');
 define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
 
 // Security Settings
-define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400); // 24 hours in seconds
-define('VERIFICATION_EXPIRY', $_ENV['VERIFICATION_EXPIRY'] ?? 86400); // 24 hours for email verification
-define('RESET_EXPIRY', $_ENV['RESET_EXPIRY'] ?? 3600); // 1 hour for password reset
+define('JWT_EXPIRY', $_ENV['JWT_EXPIRY'] ?? 86400);
+define('VERIFICATION_EXPIRY', $_ENV['VERIFICATION_EXPIRY'] ?? 86400);
+define('RESET_EXPIRY', $_ENV['RESET_EXPIRY'] ?? 3600);
 
 // Rate Limiting Settings
-define('RATE_LIMIT_WINDOW_MS', $_ENV['RATE_LIMIT_WINDOW_MS'] ?? 900000); // 15 minutes
-define('RATE_LIMIT_MAX_REQUESTS', $_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 5); // 5 attempts per window
-define('RATE_LIMIT_MAX_API_REQUESTS', $_ENV['RATE_LIMIT_MAX_API_REQUESTS'] ?? 100); // 100 API requests per window
+define('RATE_LIMIT_WINDOW_MS', $_ENV['RATE_LIMIT_WINDOW_MS'] ?? 900000);
+define('RATE_LIMIT_MAX_REQUESTS', $_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 5);
+define('RATE_LIMIT_MAX_API_REQUESTS', $_ENV['RATE_LIMIT_MAX_API_REQUESTS'] ?? 100);
 
 // Password Policy Settings
 define('MIN_PASSWORD_LENGTH', $_ENV['MIN_PASSWORD_LENGTH'] ?? 8);
@@ -67,7 +67,7 @@ define('COOKIE_SECURE', $_ENV['COOKIE_SECURE'] ?? 'true');
 define('COOKIE_HTTP_ONLY', $_ENV['COOKIE_HTTP_ONLY'] ?? 'true');
 define('COOKIE_SAME_SITE', $_ENV['COOKIE_SAME_SITE'] ?? 'strict');
 
-// Security Validation
+// CRITICAL SECURITY VALIDATION
 if (empty(JWT_SECRET)) {
     error_log('CRITICAL SECURITY ERROR: JWT_SECRET is not set in environment variables!');
     http_response_code(500);
@@ -88,7 +88,6 @@ date_default_timezone_set('UTC');
 
 // Secure session configuration
 if (session_status() === PHP_SESSION_NONE) {
-    // Configure secure session settings
     ini_set('session.cookie_secure', COOKIE_SECURE === 'true' ? '1' : '0');
     ini_set('session.cookie_httponly', COOKIE_HTTP_ONLY === 'true' ? '1' : '0');
     ini_set('session.cookie_samesite', COOKIE_SAME_SITE);
@@ -96,16 +95,12 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.sid_length', '48');
     ini_set('session.sid_bits_per_character', '6');
     
-    // Set session name
     session_name('MYBESTLIFE_SESSION');
-    
-    // Start session
     session_start();
     
-    // Regenerate session ID periodically for security
     if (!isset($_SESSION['last_regeneration'])) {
         $_SESSION['last_regeneration'] = time();
-    } elseif (time() - $_SESSION['last_regeneration'] > 300) { // 5 minutes
+    } elseif (time() - $_SESSION['last_regeneration'] > 300) {
         session_regenerate_id(true);
         $_SESSION['last_regeneration'] = time();
     }
@@ -178,7 +173,7 @@ function successResponse($message, $data = null, $statusCode = 200) {
     jsonResponse($response, $statusCode);
 }
 
-// JWT Functions (Simple implementation for shared hosting)
+// SECURE JWT Functions
 function generateJWT($payload) {
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
     $payload = json_encode($payload);
@@ -260,7 +255,3 @@ function logActivity($message, $level = 'INFO') {
     file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
 }
 ?>
-
-
-
-

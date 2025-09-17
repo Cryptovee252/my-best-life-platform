@@ -1,9 +1,17 @@
 <?php
 require_once '../config.php';
+require_once '../includes/security-middleware.php';
+require_once '../includes/secure-jwt.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     errorResponse('Method not allowed', 405);
+}
+
+// Check rate limiting
+$clientIP = SecurityMiddleware::getClientIP();
+if (!SecurityMiddleware::checkRateLimit("login_$clientIP", RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS)) {
+    errorResponse('Too many login attempts. Please try again later.', 429);
 }
 
 // Get JSON input
@@ -22,11 +30,11 @@ foreach ($required_fields as $field) {
 }
 
 // Sanitize input
-$email = sanitizeInput($input['email']);
+$email = SecurityMiddleware::sanitizeInput($input['email']);
 $password = $input['password'];
 
 // Validate email format
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!SecurityMiddleware::validateEmail($email)) {
     errorResponse('Invalid email format');
 }
 
@@ -42,7 +50,24 @@ try {
     $user = $stmt->fetch();
 
     if (!$user) {
+        SecurityMiddleware::logSecurityEvent('LOGIN_FAILURE', [
+            'email' => $email,
+            'reason' => 'User not found',
+            'ip' => $clientIP
+        ]);
         errorResponse('Invalid email or password');
+    }
+
+    // Check account lockout
+    $lockoutStatus = SecurityMiddleware::checkAccountLockout($user['id']);
+    if ($lockoutStatus['locked']) {
+        SecurityMiddleware::logSecurityEvent('LOGIN_BLOCKED', [
+            'user_id' => $user['id'],
+            'email' => $email,
+            'lockout_until' => $lockoutStatus['until'],
+            'ip' => $clientIP
+        ]);
+        errorResponse('Account temporarily locked due to suspicious activity', 423);
     }
 
     // Check if email is verified
@@ -51,9 +76,13 @@ try {
     }
 
     // Verify password
-    if (!verifyPassword($password, $user['password'])) {
+    if (!SecurityMiddleware::verifyPassword($password, $user['password'])) {
+        SecurityMiddleware::handleFailedLogin($user['id'], $email);
         errorResponse('Invalid email or password');
     }
+
+    // Reset failed login attempts on successful login
+    SecurityMiddleware::resetFailedLoginAttempts($user['id']);
 
     // Update last active date and online status
     $stmt = $pdo->prepare("
@@ -63,15 +92,22 @@ try {
     ");
     $stmt->execute([$user['id']]);
 
-    // Generate JWT token
-    $token = generateJWT([
+    // Generate secure JWT token
+    $token = SecureJWT::generateToken([
         'user_id' => $user['id'],
         'email' => $user['email'],
-        'exp' => time() + JWT_EXPIRY
+        'username' => $user['username']
     ]);
+    
+    // Generate refresh token
+    $refreshToken = SecureJWT::generateRefreshToken($user['id']);
 
-    // Log the login
-    logActivity("User logged in: $email (ID: {$user['id']})", 'INFO');
+    // Log successful login
+    SecurityMiddleware::logSecurityEvent('LOGIN_SUCCESS', [
+        'user_id' => $user['id'],
+        'email' => $email,
+        'ip' => $clientIP
+    ]);
 
     // Remove sensitive data from response
     unset($user['password']);
@@ -82,7 +118,8 @@ try {
 
     successResponse('Login successful', [
         'user' => $user,
-        'token' => $token
+        'token' => $token,
+        'refreshToken' => $refreshToken
     ]);
 
 } catch (PDOException $e) {
@@ -93,6 +130,7 @@ try {
     errorResponse('Login failed. Please try again.', 500);
 }
 ?>
+
 
 
 
