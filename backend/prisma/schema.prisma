@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -18,8 +18,8 @@ model User {
   dailyCP    Int      @default(0)
   lifetimeCP Int      @default(0)
   daysActive Int      @default(1)
-  startDate  String   @default("")
-  lastActiveDate String @default("")
+  startDate  String   @default(dbgenerated("CURRENT_DATE"))
+  lastActiveDate String @default(dbgenerated("CURRENT_DATE"))
   isOnline   Boolean  @default(false)
   lastSeen   DateTime @default(now())
   emailVerified Boolean @default(false)
