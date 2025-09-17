@@ -32,8 +32,15 @@ print_error() {
 echo "🚀 HelpMyBestLife Platform v1.2 - VPS Deployment"
 echo "=================================================="
 
-# Check if we have VPS connection details
-if [ -z "$VPS_IP" ] || [ -z "$VPS_USER" ]; then
+# Use command line arguments if provided
+if [ $# -eq 3 ]; then
+    VPS_IP=$1
+    VPS_USER=$2
+    VPS_DOMAIN=$3
+    print_status "Using command line arguments: IP=$VPS_IP, User=$VPS_USER, Domain=$VPS_DOMAIN"
+elif [ -n "$VPS_IP" ] && [ -n "$VPS_USER" ] && [ -n "$VPS_DOMAIN" ]; then
+    print_status "Using environment variables: IP=$VPS_IP, User=$VPS_USER, Domain=$VPS_DOMAIN"
+else
     print_warning "VPS connection details not provided."
     echo ""
     echo "Please provide your VPS details:"
@@ -46,13 +53,6 @@ if [ -z "$VPS_IP" ] || [ -z "$VPS_USER" ]; then
     echo "Or run with parameters:"
     echo "./deploy-to-vps.sh your.vps.ip.address your_username mybestlifeapp.com"
     exit 1
-fi
-
-# Use command line arguments if provided
-if [ $# -eq 3 ]; then
-    VPS_IP=$1
-    VPS_USER=$2
-    VPS_DOMAIN=$3
 fi
 
 print_status "Deploying to VPS: $VPS_IP as user: $VPS_USER"
