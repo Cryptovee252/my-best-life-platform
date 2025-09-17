@@ -230,6 +230,7 @@ export default function DashboardScreen() {
                 Lifetime: <Text style={styles.highlight}>{user?.lifetimeCP || 0}</Text>
               </Text>
               <Text style={styles.activeDays}>Active for {user?.daysActive || 1} days</Text>
+              <Text style={styles.testText}>I'm testing stuff</Text>
             </View>
           </View>
           
@@ -731,6 +732,12 @@ const styles = StyleSheet.create({
   activeDays: {
     color: '#aaa',
     fontSize: 16, // Increased from 14 by another 15%
+  },
+  testText: {
+    color: '#ff6b6b',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 5,
   },
   headerRight: {
     flexDirection: 'row',

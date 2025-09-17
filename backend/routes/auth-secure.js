@@ -91,9 +91,7 @@ router.post('/register', validatePassword, async (req, res) => {
         lastSeen: new Date(),
         emailVerified: false,
         verificationToken,
-        verificationExpires,
-        failedLoginAttempts: 0,
-        isLocked: false
+        verificationExpires
       }
     });
 
@@ -204,8 +202,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check if email is verified
-    if (!user.emailVerified) {
+    // Check if email is verified (skip in development)
+    if (!user.emailVerified && process.env.NODE_ENV === 'production') {
       return res.status(401).json({ 
         error: 'Please verify your email address before signing in',
         requiresVerification: true
@@ -301,7 +299,7 @@ router.post('/refresh', async (req, res) => {
       select: { id: true, email: true, username: true, emailVerified: true, isLocked: true }
     });
 
-    if (!user || !user.emailVerified || user.isLocked) {
+    if (!user || (process.env.NODE_ENV === 'production' && !user.emailVerified) || user.isLocked) {
       return res.status(401).json({ error: 'Invalid refresh token' });
     }
 

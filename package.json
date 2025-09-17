@@ -1,6 +1,6 @@
 {
   "name": "helpmybestlife-platform",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "HelpMyBestLife Platform - Full Stack Development",
   "private": true,
   "workspaces": [

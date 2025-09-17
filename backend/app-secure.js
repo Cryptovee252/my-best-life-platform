@@ -31,7 +31,9 @@ const corsOptions = {
     
     const allowedOrigins = [
       process.env.FRONTEND_URL || 'https://mybestlifeapp.com',
-      'https://www.mybestlifeapp.com'
+      'https://www.mybestlifeapp.com',
+      'http://localhost:8081',
+      'http://localhost:3000'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -158,7 +160,7 @@ app.use('/api/stories', require('./routes/stories'));
 app.get('/', (req, res) => {
   res.json({
     message: 'My Best Life Backend API - Secure Version',
-    version: '2.0.0',
+    version: '1.2.0',
     security: 'enhanced',
     endpoints: {
       health: '/api/health',

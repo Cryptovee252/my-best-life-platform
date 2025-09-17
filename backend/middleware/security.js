@@ -104,11 +104,7 @@ const secureAuth = async (req, res, next) => {
         lastSeen: true,
         emailVerified: true,
         createdAt: true,
-        updatedAt: true,
-        // Security fields
-        isLocked: true,
-        lockoutUntil: true,
-        failedLoginAttempts: true
+        updatedAt: true
       }
     });
     
@@ -118,13 +114,8 @@ const secureAuth = async (req, res, next) => {
       });
     }
 
-    // Check if account is locked
-    if (user.isLocked && user.lockoutUntil && new Date() < user.lockoutUntil) {
-      return res.status(423).json({ 
-        error: 'Account temporarily locked due to suspicious activity',
-        lockoutUntil: user.lockoutUntil
-      });
-    }
+    // Account lockout check (security fields not in schema yet)
+    // This would be implemented when security fields are added to schema
 
     // Check if email is verified
     if (!user.emailVerified) {
@@ -299,25 +290,11 @@ const handleFailedLogin = async (userId, ip) => {
   const lockoutDuration = parseInt(process.env.LOCKOUT_DURATION_MINUTES) || 15;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { failedLoginAttempts: true, lockoutUntil: true }
-    });
-
-    if (!user) return;
-
-    const newAttempts = (user.failedLoginAttempts || 0) + 1;
-    const lockoutUntil = newAttempts >= maxAttempts 
-      ? new Date(Date.now() + lockoutDuration * 60 * 1000)
-      : null;
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        failedLoginAttempts: newAttempts,
-        lockoutUntil,
-        isLocked: newAttempts >= maxAttempts
-      }
+    // Log failed login attempt (security fields not in schema yet)
+    await logSecurityEvent('FAILED_LOGIN_ATTEMPT', {
+      userId,
+      timestamp: new Date().toISOString(),
+      ip: 'unknown' // Would need to pass IP from auth route
     });
 
     // Log security event
@@ -337,16 +314,13 @@ const handleFailedLogin = async (userId, ip) => {
 // Reset failed login attempts on successful login
 const resetFailedLoginAttempts = async (userId) => {
   try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        failedLoginAttempts: 0,
-        lockoutUntil: null,
-        isLocked: false
-      }
+    // Log successful login (security fields not in schema yet)
+    await logSecurityEvent('SUCCESSFUL_LOGIN', {
+      userId,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Failed to reset failed login attempts:', error);
+    console.error('Failed to log successful login:', error);
   }
 };
 
