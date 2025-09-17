@@ -1,0 +1,31 @@
+{
+  "name": "mybestlife-backend",
+  "version": "1.0.0",
+  "description": "Backend for My Best Life app",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "deploy": "npm install --production && npx prisma generate && pm2 start app.js --name mybestlife"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

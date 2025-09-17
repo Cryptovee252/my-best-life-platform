@@ -1,0 +1,5 @@
+{
+  "backend_port": "5000",
+  "environment": "development",
+  "auto_start": false
+}

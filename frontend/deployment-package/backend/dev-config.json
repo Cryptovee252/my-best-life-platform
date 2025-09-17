@@ -1,0 +1,18 @@
+{
+  "database": {
+    "url": "postgresql://mybestlife:devpassword@localhost:5432/mybestlife",
+    "provider": "postgresql"
+  },
+  "server": {
+    "port": 5000,
+    "host": "localhost"
+  },
+  "jwt": {
+    "secret": "your-secret-key-change-in-production",
+    "expiresIn": "7d"
+  },
+  "cors": {
+    "origin": "http://localhost:8081",
+    "credentials": true
+  }
+}
