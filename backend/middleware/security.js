@@ -297,15 +297,12 @@ const handleFailedLogin = async (userId, ip) => {
       ip: 'unknown' // Would need to pass IP from auth route
     });
 
-    // Log security event
-    if (newAttempts >= maxAttempts) {
-      await logSecurityEvent('ACCOUNT_LOCKED', {
-        userId,
-        ip,
-        attempts: newAttempts,
-        lockoutUntil
-      });
-    }
+    // Log security event (simplified for now)
+    await logSecurityEvent('FAILED_LOGIN_ATTEMPT', {
+      userId,
+      ip,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Failed to handle failed login:', error);
   }
