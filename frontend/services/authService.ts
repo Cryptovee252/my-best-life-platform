@@ -1,11 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// For production, use the VPS URL with HTTPS
-// For local development, use localhost
-const API_BASE_URL = 'http://localhost:3000/api';
-
-// Alternative: Use environment variable if available
-// const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { API_BASE_URL } from '@/constants/api';
 
 export interface AuthUser {
   _id: string;

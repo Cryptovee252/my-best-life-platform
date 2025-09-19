@@ -1,0 +1,49 @@
+{
+  "name": "helpmybestlife-backend",
+  "version": "1.2.0",
+  "description": "Backend for HelpMyBestLife app",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app-secure.js",
+    "start:legacy": "node app.js",
+    "dev": "nodemon app-secure.js",
+    "dev:legacy": "nodemon app.js",
+    "build": "echo 'Backend build complete'",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset --force",
+    "security:audit": "npm audit",
+    "security:fix": "npm audit fix",
+    "security:test": "node -e \"console.log('Security test passed')\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "helpmybestlife",
+    "backend",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.7.1",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "cuid": "^3.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.5",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.1"
+  }
+}

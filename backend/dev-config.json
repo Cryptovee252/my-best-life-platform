@@ -1,6 +1,6 @@
 {
   "database": {
-    "url": "postgresql://mybestlife:devpassword@localhost:5432/mybestlife",
+    "url": "postgresql://mybestlife:devpassword@localhost:6543/mybestlife",
     "provider": "postgresql"
   },
   "server": {

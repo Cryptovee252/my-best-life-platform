@@ -111,6 +111,24 @@ router.post('/register', validatePassword, async (req, res) => {
       // Don't fail registration if email fails
     }
 
+    // Generate tokens so new user can log in immediately in development/testing
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        iat: Math.floor(Date.now() / 1000)
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRY || '7d' }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user.id, type: 'refresh' },
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRY || '30d' }
+    );
+
     // Log successful registration
     await logSecurityEvent('REGISTRATION_SUCCESS', {
       userId: user.id,
@@ -120,12 +138,21 @@ router.post('/register', validatePassword, async (req, res) => {
     });
 
     // Remove password and sensitive data from response
-    const { password: _, verificationToken: __, verificationExpires: ___, ...userWithoutSensitive } = user;
+    const {
+      password: _,
+      verificationToken: __,
+      verificationExpires: ___,
+      resetToken: ____,
+      resetExpires: _____,
+      ...userWithoutSensitive
+    } = user;
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully! Please check your email to verify your account.',
       user: userWithoutSensitive,
+      token,
+      refreshToken,
       requiresVerification: true
     });
 

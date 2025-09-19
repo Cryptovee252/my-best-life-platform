@@ -2,10 +2,27 @@ const nodemailer = require('nodemailer');
 
 class EmailService {
     constructor() {
+        const hasCredentials = process.env.SMTP_USER && process.env.SMTP_PASS;
+
+        if (process.env.NODE_ENV !== 'production' && !hasCredentials) {
+            // In development/test without credentials, stub the transport
+            this.transporter = {
+                sendMail: async (options) => {
+                    console.log('📧 Email sending skipped (no SMTP credentials in dev). Subject:', options?.subject);
+                    return Promise.resolve();
+                }
+            };
+            return;
+        }
+
+        if (!hasCredentials) {
+            throw new Error('SMTP credentials are required in production environment');
+        }
+
         this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: process.env.SMTP_PORT || 587,
-            secure: false, // true for 465, false for other ports
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
@@ -383,7 +400,6 @@ class EmailService {
 }
 
 module.exports = new EmailService();
-
 
 
 

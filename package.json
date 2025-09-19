@@ -23,6 +23,7 @@
     "deploy:staging": "node scripts/deploy-staging.js",
     "deploy:production": "node scripts/deploy-production.js",
     "backup": "node scripts/backup.js",
+    "dashboard": "node scripts/dashboard-ui/server.js",
     "clean": "npm run clean:node_modules && npm run clean:builds",
     "clean:node_modules": "rm -rf node_modules frontend/node_modules backend/node_modules",
     "clean:builds": "rm -rf frontend/dist backend/dist",

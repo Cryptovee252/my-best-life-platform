@@ -6,32 +6,36 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Rate limiting for authentication endpoints
-const authRateLimit = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5, // 5 attempts per window
-  message: {
-    error: 'Too many authentication attempts, please try again later',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true,
-  handler: (req, res) => {
-    // Log security event
-    logSecurityEvent('RATE_LIMIT_EXCEEDED', {
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      endpoint: req.path,
-      timestamp: new Date().toISOString()
-    });
-    
-    res.status(429).json({
-      error: 'Too many authentication attempts, please try again later',
-      retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
-    });
-  }
-});
+const authRateLimit = isProduction
+  ? rateLimit({
+      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+      max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 40,
+      message: {
+        error: 'Too many authentication attempts, please try again later',
+        retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+      skipSuccessfulRequests: true,
+      handler: (req, res) => {
+        // Log security event
+        logSecurityEvent('RATE_LIMIT_EXCEEDED', {
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+          endpoint: req.path,
+          timestamp: new Date().toISOString()
+        });
+
+        res.status(429).json({
+          error: 'Too many authentication attempts, please try again later',
+          retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
+        });
+      }
+    })
+  : (req, res, next) => next();
 
 // Rate limiting for general API endpoints
 const apiRateLimit = rateLimit({
@@ -118,7 +122,7 @@ const secureAuth = async (req, res, next) => {
     // This would be implemented when security fields are added to schema
 
     // Check if email is verified
-    if (!user.emailVerified) {
+    if (!user.emailVerified && process.env.NODE_ENV === 'production') {
       return res.status(403).json({ 
         error: 'Please verify your email address before accessing this resource' 
       });
